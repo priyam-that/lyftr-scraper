@@ -4,9 +4,9 @@ from playwright.sync_api import sync_playwright, TimeoutError
 from urllib.parse import urljoin
 
 
-def _should_skip_href(href: str) -> bool:
+def _should_skip_href(href: str) -> bool:# Determine if a link should be skipped
     href_lower = href.strip().lower()
-    return (
+    return ( # Skip non-navigational links
         not href_lower
         or href_lower.startswith("#")
         or href_lower.startswith("javascript:")
@@ -15,7 +15,7 @@ def _should_skip_href(href: str) -> bool:
     )
 
 
-def _record_page(pages: list[str], url: str | None) -> None:
+def _record_page(pages: list[str], url: str | None) -> None:# Record visited page URL if valid
     if not url:
         return
     if url.startswith("about:"):

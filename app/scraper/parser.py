@@ -21,7 +21,7 @@ def parse_sections(html: str, base_url: str) -> list[dict]:
 
             label = element.get_text(strip=True) # Extract heading text as label
             raw_html = str(element.parent)
-            MAX_HTML = 3000
+            MAX_HTML = 100
             # Determine section type based on heading content and context
             section_type = "info"  # default
             label_lower = label.lower() if label else ""
