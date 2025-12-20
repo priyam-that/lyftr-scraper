@@ -63,9 +63,10 @@ If Chromium launches fail due to missing OS libs (common on Linux), try:
 
 ## Primary URLs used for testing
 
-- https://example.com/ — tiny static HTML page (sanity check)
+- https://www.ycombinator.com/ — Y Combinator homepage; tests static content extraction
 - https://vercel.com/ — JS-heavy (Next.js); validates Playwright rendering + scroll + link clicks
-- https://news.ycombinator.com/ — link-dense HTML; useful to validate link extraction and the “no headings” fallback section
+- https://x.com/ — social media site; tests dynamic content and authentication walls
+- https://www.reddit.com/  — link-dense, dynamic content; validates fallback rendering and infinite scroll handling
 
 ## Known limitations / caveats
 
