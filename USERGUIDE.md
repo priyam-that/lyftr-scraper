@@ -14,6 +14,7 @@ Use this to verify the server is up and responding.
 curl -s http://localhost:8000/health
 ```
 
+
 Expected: a small JSON confirming the service is healthy (exact shape may vary).
 
 ### API discovery (FastAPI)
