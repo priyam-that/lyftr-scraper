@@ -5,13 +5,62 @@ This guide explains how to use the Lyftr Scraper API and what each phase of the 
 
 ---
 
+# Codebase Architecture
+
+## High-level structure
+
+- `app/main.py`: FastAPI app entrypoint; wires routers.
+- `app/api/`: JSON API routes.
+  - `health.py`: `GET /healthz`.
+  - `scrape.py`: `POST /scrape` (core scrape pipeline + response assembly).
+- `app/frontend/`: lightweight HTML UI.
+  - `routes.py`: `GET /` renders `app/frontend/templates/index.html`.
+- `app/schemas/`: Pydantic response models.
+  - `response.py`: `ScrapeResponse` → `ScrapeResult` → `Meta`/`Section[]`/`Interactions`.
+- `app/scraper/`: scraping implementation (static fetch, JS fallback, parsing).
+  - `static.py`: `requests` fetch + basic metadata extraction.
+  - `heuristics.py`: decides whether JS rendering is required.
+  - `js.py`: Playwright Chromium rendering + bounded scroll/click interaction logging.
+  - `parser.py`: converts HTML into semantic `sections[]` (headings + text + links + truncated `rawHtml`).
+
+## Request/data flow
+
+`POST /scrape` (`app/api/scrape.py`) runs this pipeline:
+
+1. Validate input payload (`url` present; starts with `http://` or `https://`).
+2. Fetch initial HTML via `app/scraper/static.py::fetch_static_html`.
+3. Decide whether to escalate via `app/scraper/heuristics.py::needs_js_rendering`.
+4. If needed, render with Playwright via `app/scraper/js.py::fetch_js_with_interactions` (captures `scrolls`, `clicks[]`, `pages[]`).
+5. Parse metadata via `app/scraper/static.py::extract_basic_meta`.
+6. Parse sections via `app/scraper/parser.py::parse_sections`.
+7. Assemble the typed response using models in `app/schemas/response.py`.
+
+Diagram:
+
+```text
+client
+  │
+  ├─ POST /scrape  ───────────────────────────────▶  app/api/scrape.py
+  │                                                     │
+  │                                                     ├─ fetch_static_html()  ─▶ app/scraper/static.py
+  │                                                     ├─ needs_js_rendering() ─▶ app/scraper/heuristics.py
+  │                                                     ├─ (optional) fetch_js_with_interactions() ─▶ app/scraper/js.py
+  │                                                     ├─ extract_basic_meta() ─▶ app/scraper/static.py
+  │                                                     ├─ parse_sections()     ─▶ app/scraper/parser.py
+  │                                                     └─ ScrapeResponse models ─▶ app/schemas/response.py
+  │
+  └─ JSON response: result.meta + result.sections[] + result.interactions
+```
+
+---
+
 ## Phase 0 — Health Checking & Service Contract
 
 ### Health check
 Use this to verify the server is up and responding.
 
 ```bash
-curl -s http://localhost:8000/health
+curl -s http://localhost:8000/healthz
 ```
 
 
