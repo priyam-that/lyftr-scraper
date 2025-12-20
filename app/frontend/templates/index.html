@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lyftr Web Scraper</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 40px;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    input {
+      width: 420px;
+    }
+
+    button {
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      border: none;
+      margin-left: 6px;
+    }
+
+    button.secondary {
+      background: #334155;
+    }
+
+    pre {
+      background: #020617;
+      padding: 20px;
+      margin-top: 15px;
+      overflow-x: auto;
+      max-height: 500px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      display: none;
+    }
+
+    .error {
+      color: #f87171;
+      margin-top: 10px;
+    }
+
+    .loading {
+      color: #38bdf8;
+      margin-top: 10px;
+    }
+
+    .actions {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Lyftr Scraper</h1>
+  <p>Enter a URL to scrape structured content.</p>
+
+  <input id="urlInput" placeholder="https://example.com" />
+  <button onclick="scrape()">Scrape</button>
+
+  <div id="status"></div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="actions">
+    <button class="secondary" onclick="toggleJson()">Toggle Full JSON</button>
+    <button class="secondary" onclick="downloadJson()">Download JSON</button>
+  </div>
+
+  <!-- CONSOLIDATED JSON VIEW -->
+  <pre id="output"></pre>
+
+<script>
+let lastResponse = null;
+
+async function scrape() {
+  const url = document.getElementById("urlInput").value;
+  const status = document.getElementById("status");
+  const output = document.getElementById("output");
+
+  status.innerHTML = "<div class='loading'>Scraping...</div>";
+  output.style.display = "none";
+  output.textContent = "";
+  lastResponse = null;
+
+  try {
+    const res = await fetch("/scrape", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      status.innerHTML = "<div class='error'>" + data.detail + "</div>";
+      return;
+    }
+
+    lastResponse = data;
+    status.innerHTML = "Done Web Scraping with (scrolls: " + data.result.interactions.scrolls + ")";
+    output.textContent = JSON.stringify(data, null, 2);
+
+  } catch (err) {
+    status.innerHTML = "<div class='error'>Failed to connect to backend</div>";
+  }
+}
+
+function toggleJson() {
+  const output = document.getElementById("output");
+  output.style.display = output.style.display === "none" ? "block" : "none";
+}
+
+function downloadJson() {
+  if (!lastResponse) {
+    alert("No scrape result to download yet.");
+    return;
+  }
+
+  const blob = new Blob(
+    [JSON.stringify(lastResponse, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "scrape-result.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+
+</body>
+</html>

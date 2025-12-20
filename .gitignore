@@ -1,0 +1,29 @@
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE / OS
+.vscode/
+.DS_Store
+
+# Local env/config
+.env
+.env.*
+
+# Playwright (only if it ends up inside the repo for your setup)
+ms-playwright/
+playwright/.cache/
