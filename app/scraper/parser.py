@@ -22,9 +22,30 @@ def parse_sections(html: str, base_url: str) -> list[dict]:
             label = element.get_text(strip=True) # Extract heading text as label
             raw_html = str(element.parent)
             MAX_HTML = 3000
+            # Determine section type based on heading content and context
+            section_type = "info"  # default
+            label_lower = label.lower() if label else ""
+            
+            if section_index == 0 or element.name == "h1":
+                section_type = "hero"
+            elif any(keyword in label_lower for keyword in ["footer", "contact", "copyright"]):
+                section_type = "footer"
+            elif any(keyword in label_lower for keyword in ["news", "blog", "article", "post"]):
+                section_type = "news"
+            elif any(keyword in label_lower for keyword in ["about", "who we are", "our story"]):
+                section_type = "about"
+            elif any(keyword in label_lower for keyword in ["service", "what we do", "offer"]):
+                section_type = "services"
+            elif any(keyword in label_lower for keyword in ["team", "our team", "people"]):
+                section_type = "team"
+            elif any(keyword in label_lower for keyword in ["testimonial", "review", "feedback"]):
+                section_type = "testimonials"
+            elif any(keyword in label_lower for keyword in ["faq", "question", "help"]):
+                section_type = "faq"
+            
             current_section = {
-                "id": f"section-{section_index}",
-                "type": "section",
+                "id": f"{section_type}-{section_index}",
+                "type": section_type,
                 "label": label if label else "Untitled Section",
                 "sourceUrl": base_url,
                 "content": {
