@@ -8,5 +8,6 @@
   "noise_filtering": true,
   "html_truncation": true,
   "form_interactions": false,
-  "auth_handling": false
+  "auth_handling": false,
+  "captcha_handling": false
 }
