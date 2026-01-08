@@ -21,8 +21,8 @@ Then open:
 
 ```bash
 curl -sS -X POST "http://localhost:8000/scrape" \
-	-H "Content-Type: application/json" \
-	-d '{"url":"https://example.com/"}' | python -m json.tool
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://example.com/"}' | python -m json.tool
 ```
 
 Response shape:
